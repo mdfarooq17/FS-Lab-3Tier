@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ClassLibraryBusiness/ClassLibraryBusiness.csproj" />
+  <Project Path="ClassLibraryDel/ClassLibraryDel.csproj" />
+  <Project Path="ClassLibraryModel/ClassLibraryModel.csproj" />
+  <Project Path="UserInterface/UserInterface.csproj" />
+</Solution>

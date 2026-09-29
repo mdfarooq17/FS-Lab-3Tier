@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClassLibraryBusiness\ClassLibraryBusiness.csproj" />
+    <ProjectReference Include="..\ClassLibraryDel\ClassLibraryDel.csproj" />
+    <ProjectReference Include="..\ClassLibraryModel\ClassLibraryModel.csproj" />
+  </ItemGroup>
+
+</Project>

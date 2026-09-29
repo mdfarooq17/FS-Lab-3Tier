@@ -1,0 +1,130 @@
+@page "/products"
+@using ClassLibraryModel.Models
+@using ClassLibraryBusiness.Business.Interfaces
+@inject IProductService ProductService
+@rendermode InteractiveServer
+
+<h1>Products</h1>
+
+<div class="mb-3">
+    <button class="btn btn-primary" @onclick="ShowCreateForm">Add Product</button>
+</div>
+
+@if (isEditing || isCreating)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input class="form-control" @bind="editProduct.Name" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Price</label>
+                <input class="form-control" type="number" step="0.01" @bind="editProduct.Price" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <input class="form-control" @bind="editProduct.Category" />
+            </div>
+            <button class="btn btn-success me-2" @onclick="SaveProduct">Save</button>
+            <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </div>
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in products)
+        {
+            <tr>
+                <td>@p.Name</td>
+                <td>@p.Price</td>
+                <td>@p.Category</td>
+                <td>
+                    <button class="btn btn-sm btn-primary me-2" @onclick="() => EditProduct(p)">Edit</button>
+                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(p.Id)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<ProductModel> products = new();
+    private ProductModel editProduct = new();
+    private bool isEditing = false;
+    private bool isCreating = false;
+
+    protected override void OnInitialized()
+    {
+        LoadProducts();
+    }
+
+    private void LoadProducts()
+    {
+        products = ProductService.GetAll();
+    }
+
+    private void ShowCreateForm()
+    {
+        editProduct = new ProductModel();
+        isCreating = true;
+        isEditing = false;
+    }
+
+    private void EditProduct(ProductModel product)
+    {
+        editProduct = new ProductModel
+        {
+            Id = product.Id,
+            Name = product.Name,
+            Price = product.Price,
+            Category = product.Category
+        };
+        isEditing = true;
+        isCreating = false;
+    }
+
+    private void SaveProduct()
+    {
+        try
+        {
+            if (isCreating)
+            {
+                ProductService.Create(editProduct);
+            }
+            else if (isEditing)
+            {
+                ProductService.Update(editProduct);
+            }
+        }
+        catch (Exception ex)
+        {
+            // In a real app show validation message; keep simple for lab
+            Console.WriteLine(ex.Message);
+        }
+
+        isCreating = isEditing = false;
+        LoadProducts();
+    }
+
+    private void Cancel()
+    {
+        isCreating = isEditing = false;
+        editProduct = new ProductModel();
+    }
+
+    private void DeleteProduct(Guid id)
+    {
+        ProductService.Delete(id);
+        LoadProducts();
+    }
+}

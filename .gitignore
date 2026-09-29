@@ -1,0 +1,22 @@
+/.vs/
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+TestResults/
+/.idea/
+*.db
+*.db-journal
+.DS_Store
+
+# Rider and JetBrains
+/.idea/
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
