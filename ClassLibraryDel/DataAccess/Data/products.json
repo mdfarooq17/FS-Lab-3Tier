@@ -1,0 +1,32 @@
+[
+  {
+    "Id": "83e44423-9c6b-40c7-9301-5c2efbbc588b",
+    "Name": "Laptop",
+    "Price": 120000,
+    "Category": "Electronics"
+  },
+  {
+    "Id": "c2a2841b-5991-479e-b7f4-bb682671ed31",
+    "Name": "Keyboard",
+    "Price": 5000,
+    "Category": "Accessories"
+  },
+  {
+    "Id": "532e702a-055c-4005-a653-aa5a808ba093",
+    "Name": "Mouse",
+    "Price": 2500,
+    "Category": "Accessories"
+  },
+  {
+    "Id": "31ffacf7-020a-4242-8176-11a735afc6d1",
+    "Name": "pc",
+    "Price": 10000,
+    "Category": "Electronic"
+  },
+  {
+    "Id": "caf8160e-ac58-4b6d-ad2c-e05fb13c3396",
+    "Name": "pad",
+    "Price": 500,
+    "Category": "access"
+  }
+]

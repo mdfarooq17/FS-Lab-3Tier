@@ -10,8 +10,11 @@ public class JsonProductRepository : IProductRepository
 
     public JsonProductRepository()
     {
+        // When the application runs the current directory is the entry project's folder (UserInterface).
+        // The Data folder was moved to the ClassLibraryDel project. Build a relative path from the
+        // current directory to the ClassLibraryDel/DataAccess/Data folder in the solution.
         var contentRoot = Directory.GetCurrentDirectory();
-        var dataFolder = Path.Combine(contentRoot, "DataAccess", "Data");
+        var dataFolder = Path.Combine(contentRoot, "..", "ClassLibraryDel", "DataAccess", "Data");
         Directory.CreateDirectory(dataFolder);
         _filePath = Path.Combine(dataFolder, "products.json");
         if (!File.Exists(_filePath))
