@@ -1,77 +1,159 @@
 @page "/products"
 @using ClassLibraryModel.Models
+@using System.Linq
 @using ClassLibraryBusiness.Business.Interfaces
 @inject IProductService ProductService
 @rendermode InteractiveServer
 
-<h1>Products</h1>
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="mb-0">Products</h2>
+        <small class="text-muted">Manage your product catalog (Supabase)</small>
+    </div>
+    <div class="d-flex gap-2">
+        <input class="form-control" placeholder="Search by name or category" @bind="searchText" @oninput="OnSearch" />
+        <button class="btn btn-primary" @onclick="ShowCreateForm">New</button>
+    </div>
 
-<div class="mb-3">
-    <button class="btn btn-primary" @onclick="ShowCreateForm">Add Product</button>
 </div>
 
-@if (isEditing || isCreating)
-{
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="mb-3">
-                <label class="form-label">Name</label>
-                <input class="form-control" @bind="editProduct.Name" />
+<div class="row g-3">
+    <div class="col-12 col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (isLoading)
+                {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <div class="mt-2 text-muted">Loading products...</div>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th class="text-end">Price</th>
+                                    <th>Category</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (filteredProducts?.Any() != true)
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted">No products found</td></tr>
+                                }
+                                else
+                                {
+                                    @foreach (var p in filteredProducts)
+                                    {
+                                        <tr>
+                                            <td>@p.Name</td>
+                                            <td class="text-end">@p.Price.ToString("C")</td>
+                                            <td>@p.Category</td>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditProduct(p)">Edit</button>
+                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(p.Id)">Delete</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
             </div>
-            <div class="mb-3">
-                <label class="form-label">Price</label>
-                <input class="form-control" type="number" step="0.01" @bind="editProduct.Price" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Category</label>
-                <input class="form-control" @bind="editProduct.Category" />
-            </div>
-            <button class="btn btn-success me-2" @onclick="SaveProduct">Save</button>
-            <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
         </div>
     </div>
-}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Category</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var p in products)
-        {
-            <tr>
-                <td>@p.Name</td>
-                <td>@p.Price</td>
-                <td>@p.Category</td>
-                <td>
-                    <button class="btn btn-sm btn-primary me-2" @onclick="() => EditProduct(p)">Edit</button>
-                    <button class="btn btn-sm btn-danger" @onclick="() => DeleteProduct(p.Id)">Delete</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <div class="col-12 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">@((isCreating) ? "Add Product" : (isEditing ? "Edit Product" : "Product Details"))</h5>
+
+                <EditForm Model="editProduct" OnValidSubmit="SaveProduct">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <InputText @bind-Value="editProduct.Name" class="form-control form-control-lg" placeholder="Product name" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Price</label>
+                        <InputNumber @bind-Value="editProduct.Price" class="form-control form-control-lg" step="0.01" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <InputText @bind-Value="editProduct.Category" class="form-control" placeholder="Category (optional)" />
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-success">@((editProduct.Id == Guid.Empty) ? "Add" : "Update")</button>
+                        <button type="button" class="btn btn-secondary" @onclick="Cancel">Clear</button>
+                    </div>
+                </EditForm>
+
+                @if (!string.IsNullOrEmpty(error))
+                {
+                    <div class="alert alert-danger mt-3">@error</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     private List<ProductModel> products = new();
+    private List<ProductModel> filteredProducts = new();
     private ProductModel editProduct = new();
     private bool isEditing = false;
     private bool isCreating = false;
+    private bool isLoading = false;
+    private string error = string.Empty;
+    private string searchText = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadProducts();
+        await LoadProductsAsync();
     }
 
-    private void LoadProducts()
+    private async Task LoadProductsAsync()
     {
-        products = ProductService.GetAll();
+        isLoading = true;
+        error = string.Empty;
+        try
+        {
+            // ProductService is synchronous (wrap to avoid blocking UI thread)
+            products = await Task.Run(() => ProductService.GetAll());
+            ApplyFilter();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+            filteredProducts = products.ToList();
+        else
+        {
+            var q = searchText.Trim().ToLowerInvariant();
+            filteredProducts = products.Where(p => (p.Name ?? string.Empty).ToLowerInvariant().Contains(q) || (p.Category ?? string.Empty).ToLowerInvariant().Contains(q)).ToList();
+        }
+    }
+
+    private void OnSearch(ChangeEventArgs _) => ApplyFilter();
 
     private void ShowCreateForm()
     {
@@ -93,27 +175,31 @@
         isCreating = false;
     }
 
-    private void SaveProduct()
+    private async Task SaveProduct()
     {
+        error = string.Empty;
         try
         {
-            if (isCreating)
+            if (editProduct.Id == Guid.Empty)
             {
-                ProductService.Create(editProduct);
+                editProduct.Id = Guid.NewGuid();
+                await Task.Run(() => ProductService.Create(editProduct));
             }
-            else if (isEditing)
+            else
             {
-                ProductService.Update(editProduct);
+                await Task.Run(() => ProductService.Update(editProduct));
             }
+
+            // refresh
+            await LoadProductsAsync();
+            // reset form
+            editProduct = new ProductModel();
+            isCreating = isEditing = false;
         }
         catch (Exception ex)
         {
-            // In a real app show validation message; keep simple for lab
-            Console.WriteLine(ex.Message);
+            error = ex.Message;
         }
-
-        isCreating = isEditing = false;
-        LoadProducts();
     }
 
     private void Cancel()
@@ -122,9 +208,29 @@
         editProduct = new ProductModel();
     }
 
-    private void DeleteProduct(Guid id)
+    private async Task ConfirmDelete(Guid id)
     {
-        ProductService.Delete(id);
-        LoadProducts();
+        var confirmed = await JSConfirm($"Delete product {id}? This action cannot be undone.");
+        if (confirmed)
+        {
+            await Task.Run(() => ProductService.Delete(id));
+            await LoadProductsAsync();
+        }
+    }
+
+    // small JS interop for confirm dialog
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
+    private async Task<bool> JSConfirm(string message)
+    {
+        try
+        {
+            return await JS.InvokeAsync<bool>("confirm", message);
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
