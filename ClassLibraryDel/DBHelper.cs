@@ -13,9 +13,15 @@ namespace ClassLibraryDel
             // (and other credentials) can be fixed without recompiling.
             // Set the environment variable SUPABASE_DB_CONNECTION to a full Npgsql connection string.
             var env = Environment.GetEnvironmentVariable("SUPABASE_DB_CONNECTION");
-            var connStr = !string.IsNullOrWhiteSpace(env)
-                ? env
-                : "Host=db.awpfseynateigdbdhqik.supabase.co;Port=5432;Database=postgres;Username=postgres;Password=Farooq17supa;SSL Mode=Require;Trust Server Certificate=true";
+            if (string.IsNullOrWhiteSpace(env))
+            {
+                // Fail fast and require the connection string to be provided via environment
+                // variable so credentials are not stored in source control.
+                throw new InvalidOperationException(
+                    "Database connection string not configured. Set the SUPABASE_DB_CONNECTION environment variable to a valid Npgsql connection string before starting the application.");
+            }
+
+            var connStr = env;
 
             // Perform a quick DNS check for the Host value so failures are reported clearly.
             var m = Regex.Match(connStr, @"Host\s*=\s*([^;]+)", RegexOptions.IgnoreCase);

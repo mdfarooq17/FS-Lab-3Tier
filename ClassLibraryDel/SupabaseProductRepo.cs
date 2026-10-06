@@ -3,6 +3,7 @@ using ClassLibraryDel.DataAccess.Interfaces;
 using ClassLibraryModel;
 using ClassLibraryModel.Models;
 using Npgsql;
+using System.Text.RegularExpressions;
 using System;
 using System.Collections.Generic;
 namespace DataAccessLayer
@@ -16,6 +17,14 @@ namespace DataAccessLayer
 VALUES (@Name, @Price, @Category)";
             using (NpgsqlConnection con = DBHelper.GetConnection())
             {
+                // Log masked connection string for debugging (do not log passwords)
+                try
+                {
+                    var masked = Regex.Replace(con.ConnectionString ?? string.Empty, "(Password\\s*=\\s*)([^;]+)", "$1****", RegexOptions.IgnoreCase);
+                    Console.WriteLine($"[DEBUG] DB Connection: {masked}");
+                }
+                catch { }
+
                 con.Open();
                 using (NpgsqlCommand cmd = new NpgsqlCommand(query, con))
                 {

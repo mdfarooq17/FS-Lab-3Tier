@@ -7,7 +7,8 @@
         "launchBrowser": true,
         "applicationUrl": "http://localhost:5214",
         "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development"
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "SUPABASE_DB_CONNECTION": "Host=your-db-host;Port=5432;Database=your-db;Username=your-user;Password=your-password;SSL Mode=Require;Trust Server Certificate=true"
         }
       }
     }
