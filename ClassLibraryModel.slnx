@@ -3,4 +3,5 @@
   <Project Path="ClassLibraryDel/ClassLibraryDel.csproj" />
   <Project Path="ClassLibraryModel/ClassLibraryModel.csproj" />
   <Project Path="UserInterface/UserInterface.csproj" />
+  <Project Path="WebAPI/WebAPI.csproj" Id="bcedaf14-d7e1-4915-a145-c471d85a53a6" />
 </Solution>

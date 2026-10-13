@@ -8,9 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ClassLibraryBusiness\ClassLibraryBusiness.csproj" />
     <ProjectReference Include="..\ClassLibraryDel\ClassLibraryDel.csproj" />
     <ProjectReference Include="..\ClassLibraryModel\ClassLibraryModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

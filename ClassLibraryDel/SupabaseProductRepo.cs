@@ -121,7 +121,7 @@ WHERE ""Id"" = @Id";
             {
                 Id = reader.GetGuid(reader.GetOrdinal("Id")),
                 Name = reader.GetString(reader.GetOrdinal("Name")),
-                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                Price = reader.GetDouble(reader.GetOrdinal("Price")),
                 Category = reader.IsDBNull(reader.GetOrdinal("Category"))
             ? string.Empty
             : reader.GetString(reader.GetOrdinal("Category"))
